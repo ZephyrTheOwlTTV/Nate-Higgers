@@ -1,0 +1,99 @@
+// yo this ma testing place for some dumbshit, yee yee sauce
+
+function onOpen2() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Manual Trigger')
+      .addItem('Send Email Reminders', 'sendEmailReminders')
+      .addToUi();
+}
+
+function sendEmailReminders() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("NAME OF UR SHEET");
+  var currentDate = new Date();
+
+  var data = sheet.getRange("DATA VALUE").getValues();
+
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    var dueDateStr = row[X]; // Column R for due dates
+
+    var dueDate;
+
+    // Try parsing due date as "DD-MM-YYYY" format
+    dueDate = parseDate(dueDateStr, "DD-MM-YYYY");
+    
+    // If not parsed successfully, try parsing as ISO-8601 format
+    if (dueDate === null) {
+      dueDate = new Date(dueDateStr);
+    }
+
+    Logger.log("Current Date: " + currentDate);
+    Logger.log("Row Data: " + JSON.stringify(row));
+    Logger.log("Due Date String (Raw): " + dueDateStr);
+    Logger.log("Due Date: " + dueDate);
+
+    if (
+      dueDate !== null &&
+      isSameDate(currentDate, dueDate)
+    ) {
+      var recipientEmail = "example-email";
+      var customerName = row[X]; // Get customer name from column B
+      var emailSubject =
+        "Reminder for " + customerName + ": EXAMPLE is due today";
+      var emailBody =
+        "This is an automated message,\n" +
+        "Reminder for " +
+        customerName +
+        " THAT REMINDER THINGY is due today. Please refer to the spreadsheet for further details.\n\n" +
+        "Link to the spreadsheet:\n" +
+        "LINK TO UR SPREADSHEET";
+
+      try {
+        MailApp.sendEmail(recipientEmail, emailSubject, emailBody);
+        Logger.log("Email sent successfully to " + recipientEmail);
+      } catch (error) {
+        Logger.log("Failed to send email. Error: " + error.toString());
+      }
+    }
+  }
+}
+
+function isValidDate(date) {
+  return date instanceof Date && !isNaN(date);
+}
+
+function isSameDate(date1, date2) {
+  if (date1 instanceof Date && date2 instanceof Date) {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  }
+  return false;
+}
+
+function onOpen() {
+  var ui = SpreadsheetApp.getUi();
+  ui.createMenu('Whatsapp Hyperlink')
+      .addItem('Set WhatsApp Reminder', 'setWhatsAppReminder')
+      .addToUi();
+}
+
+function setWhatsAppReminder() {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getActiveSheet();
+  
+  var reminderText = sheet.getActiveCell().getValue();
+  
+  var whatsappLink = "WHATSAPP LINK"
+  
+  openWhatsAppLink(whatsappLink);
+}
+
+function openWhatsAppLink(link) {
+  var html = HtmlService.createHtmlOutput('<script>window.open("' + link + '", "_blank");google.script.host.close();</script>');
+  SpreadsheetApp.getUi().showModalDialog(html, "Opening WhatsApp");
+}
+
+//script by Aiden Tan V5.19.1b
